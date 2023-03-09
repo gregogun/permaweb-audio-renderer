@@ -1,0 +1,43 @@
+{
+  "name": "nextjs-arweave",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "prebuild": "pnpm clean-build && node scripts/add-asset-prefix.mjs",
+    "postbuild": "node scripts/remove-asset-prefix.mjs && prettier --write './next.config.js'",
+    "build": "pnpm prebuild && next build && next export && pnpm postbuild",
+    "upload": "pnpm build && pnpm bundlr",
+    "upload-nc": "pnpm build && pnpm bundlr --no-confirmation",
+    "bundlr": "bundlr upload-dir out -c arweave -h https://node2.bundlr.network -w ./wallet.json --index-file index.html",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier --write '**/*.{json,md,mjs,js,ts,jsx,tsx,yml,css}'",
+    "clean": "pnpm clean-build && rm -rf node_modules",
+    "clean-build": "rm -rf out*"
+  },
+  "dependencies": {
+    "@aura-ui/react": "0.0.5-alpha.2",
+    "@next/font": "13.1.6",
+    "arconnect": "0.4.2",
+    "arweave": "1.12.4",
+    "arweave-account": "1.3.4",
+    "arweave-graphql": "0.0.5",
+    "arweave-wallet-ui-test": "0.0.9",
+    "next": "13.1.6",
+    "next-themes": "^0.2.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "warp-contracts": "1.2.52"
+  },
+  "devDependencies": {
+    "@types/node": "18.11.18",
+    "@types/react": "18.0.27",
+    "@types/react-dom": "18.0.10",
+    "arlocal": "1.1.60",
+    "eslint": "8.33.0",
+    "eslint-config-next": "13.1.6",
+    "prettier": "2.8.4",
+    "typescript": "4.7.4"
+  }
+}
