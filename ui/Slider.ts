@@ -33,5 +33,5 @@ export const SliderThumb = styled(Slider.Thumb, {
   backgroundColor: "$slate12",
   boxShadow: `0 2px 10px $colors$blackA3`,
   borderRadius: 10,
-  //   "&:hover": { backgroundColor: "$slate11" },
+  "&:focus": { outline: "none", boxShadow: `0 0 0 4px $colors$whiteA8` },
 });

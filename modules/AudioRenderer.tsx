@@ -4,6 +4,7 @@ import { Loader } from "@/ui/Loader";
 import { SliderRange, SliderRoot, SliderThumb, SliderTrack } from "@/ui/Slider";
 import {
   Box,
+  Button,
   Center,
   Flex,
   IconButton,
