@@ -44,3 +44,6 @@ keyfile.json
 
 # bundlr
 out-*
+
+#local
+local/

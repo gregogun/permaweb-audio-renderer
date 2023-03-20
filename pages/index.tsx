@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { AudioRenderer } from "@/modules/AudioRenderer";
 import { Loader } from "@/ui/Loader";
+import { Audio } from "@/modules/Audio";
 
 const Main = styled("main", {
   display: "flex",
@@ -99,10 +100,12 @@ export default function Home() {
       </Head>
       <Center
         css={{
+          // backgroundColor: "$blackA1",
           height: "100%",
         }}
       >
-        {txid ? <AudioRenderer txid={txid} /> : <Loader />}
+        {/* {txid ? <AudioRenderer txid={txid} /> : <Loader />} */}
+        <Audio />
       </Center>
     </>
   );
