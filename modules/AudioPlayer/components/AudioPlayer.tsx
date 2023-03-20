@@ -1,23 +1,10 @@
 import { SliderRange, SliderRoot, SliderThumb, SliderTrack } from "@/ui/Slider";
-import {
-  Box,
-  Button,
-  Flex,
-  Grid,
-  IconButton,
-  styled,
-  Typography,
-} from "@aura-ui/react";
-import {
-  DragEvent,
-  KeyboardEvent,
-  MouseEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { formatTime } from "@/utils";
+import { Flex, Grid, IconButton, styled, Typography } from "@aura-ui/react";
+import { KeyboardEvent, useState } from "react";
 import { MdPause, MdPlayArrow } from "react-icons/md";
-import { RiVolumeDownFill, RiVolumeUpFill } from "react-icons/ri";
+import { MdVolumeDown, MdVolumeUp } from "react-icons/md";
+import { useAudioPlayer } from "../hooks/useAudioPlayer";
 
 const PlayPauseButton = styled(IconButton, {
   br: 9999,
@@ -72,61 +59,30 @@ const CoverArtwork = styled("img", {
   objectPosition: "center",
 });
 
-export const Audio = () => {
-  const audioRef = useRef<HTMLMediaElement | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const [duration, setDuration] = useState<number>();
-  const [currentTime, setCurrentTime] = useState<number>(0);
-  const [playing, setPlaying] = useState(false);
-  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
-  const gainRef = useRef<GainNode | null>(null);
+interface AudioPlayerProps {
+  txid: string | undefined;
+  gateway?: string;
+}
+
+export const AudioPlayer = ({
+  txid,
+  gateway = "https://arweave.net",
+}: AudioPlayerProps) => {
   const [progressStep, setProgressStep] = useState<number>(0.01);
-  const [scrubbedValue, setScrubbedValue] = useState<number | undefined>(
-    undefined
-  );
-  const [scrubbing, setScrubbing] = useState<boolean>();
-
-  useEffect(() => {
-    // set audio context
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = new AudioContext();
-    }
-
-    // set gain node
-    if (!gainRef.current) {
-      gainRef.current = audioCtxRef.current.createGain();
-    }
-
-    // set media element source
-    if (!sourceRef.current) {
-      sourceRef.current = audioCtxRef.current.createMediaElementSource(
-        audioRef.current as HTMLMediaElement
-      );
-      sourceRef.current
-        .connect(gainRef.current)
-        .connect(audioCtxRef.current.destination);
-    }
-  }, []);
-
-  const handlePlayPause = () => {
-    if (!audioRef.current || !audioCtxRef.current) return;
-
-    if (audioCtxRef.current.state === "suspended") {
-      audioCtxRef.current.resume();
-    }
-
-    if (playing) {
-      audioRef.current.pause();
-      setPlaying(false);
-    }
-
-    if (!playing && audioRef.current.readyState >= 2) {
-      audioRef.current.play();
-      setPlaying(true);
-    }
-  };
+  const {
+    audioRef,
+    gainRef,
+    audioCtxRef,
+    playing,
+    duration,
+    currentTime,
+    setCurrentTime,
+    scrubbing,
+    setScrubbing,
+    scrubbedValue,
+    setScrubbedValue,
+    handlePlayPause,
+  } = useAudioPlayer();
 
   const handleValueChange = (e: number[]) => {
     if (!gainRef.current) return;
@@ -154,69 +110,6 @@ export const Audio = () => {
       setProgressStep(5);
     }
   };
-
-  // set duration
-  useEffect(() => {
-    const seconds = Math.floor(audioRef.current?.duration || 0);
-    setDuration(seconds);
-    const current = Math.floor(audioRef.current?.currentTime || 0);
-    setCurrentTime(current);
-  }, [audioRef.current?.onloadeddata, audioRef.current?.readyState]);
-
-  // listeners
-  useEffect(() => {
-    if (audioRef.current) {
-      // if audio has ended
-      audioRef.current.addEventListener("ended", handleEnded);
-      audioRef.current.addEventListener("timeupdate", handleTimeUpdate);
-    }
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.removeEventListener("ended", handleEnded);
-        audioRef.current.removeEventListener("timeupdate", handleTimeUpdate);
-      }
-    };
-  }, []);
-
-  const handleEnded = () => {
-    setPlaying(false);
-  };
-
-  const handleTimeUpdate = () => {
-    // check for current runs in useffect
-    setCurrentTime(audioRef.current?.currentTime as number);
-  };
-
-  // function formatTime(currentTime: number) {
-  //   const hours = Math.floor(currentTime / 3600);
-  //   const minutes = Math.floor((currentTime % 3600) / 60);
-  //   const seconds = Math.floor(currentTime % 60);
-
-  //   const hourString = hours > 0 ? hours.toString().padStart(2, "0") + ":" : "";
-  //   const minuteString = minutes.toString().padStart(1, "0");
-  //   const secondString = seconds.toString().padStart(2, "0");
-
-  //   if (hours > 0) {
-  //     return hourString + minuteString + ":" + secondString;
-  //   } else {
-  //     return minuteString + ":" + secondString;
-  //   }
-  // }
-
-  function formatTime(time: number): string {
-    const minutes: number = Math.floor(time / 60) % 60;
-    const seconds: number = Math.floor(time % 60);
-    const hours: number = Math.floor(time / 3600);
-
-    const formattedSeconds: string = `${seconds < 10 ? "0" : ""}${seconds}`;
-
-    if (hours > 0) {
-      return `${hours}:${minutes}:${formattedSeconds}`;
-    }
-
-    return `${minutes}:${formattedSeconds}`;
-  }
 
   return (
     <AudioContainer
@@ -309,17 +202,24 @@ export const Audio = () => {
         </PlayPauseButton>
       </ControlsContainer>
 
-      <Grid
+      <Flex
         css={{
-          gridTemplateColumns: "20px 1fr 20px",
-          width: "80%",
-          mx: "auto",
-          alignItems: "center",
+          width: "300px",
+
+          "& svg": {
+            size: "$5",
+          },
         }}
+        align="center"
+        justify="center"
         gap="2"
       >
-        <RiVolumeDownFill />
-        <VolumeContainer>
+        <MdVolumeDown />
+        <VolumeContainer
+          css={{
+            minWidth: 200,
+          }}
+        >
           <VolumeSlider
             defaultValue={[
               gainRef.current ? gainRef.current.gain.value / 100 : 100,
@@ -336,8 +236,8 @@ export const Audio = () => {
             <SliderThumb data-slider-thumb />
           </VolumeSlider>
         </VolumeContainer>
-        <RiVolumeUpFill />
-      </Grid>
+        <MdVolumeUp />
+      </Flex>
     </AudioContainer>
   );
 };
