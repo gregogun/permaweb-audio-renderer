@@ -35,6 +35,11 @@ export const useAudioPlayer = () => {
         .connect(gainRef.current)
         .connect(audioCtxRef.current.destination);
     }
+
+    if (audioRef.current) {
+      // allow audio to be played from gateways
+      audioRef.current.crossOrigin = "anonymous";
+    }
   }, []);
 
   const handlePlayPause = () => {

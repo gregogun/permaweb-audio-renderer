@@ -1,78 +1,9 @@
 import Head from "next/head";
-import styles from "@/styles/Home.module.css";
-import { Center, Container, Flex, styled, Typography } from "@aura-ui/react";
-import { ConnectWallet } from "arweave-wallet-ui-test";
-import { account } from "@/lib/arweave";
+import { Center } from "@aura-ui/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { AudioRenderer } from "@/modules/AudioRenderer";
 import { Loader } from "@/ui/Loader";
-import { AudioPlayer } from "@/modules/AudioPlayer/components/AudioPlayer";
-
-const Main = styled("main", {
-  display: "flex",
-  alignItems: "center",
-  flexDirection: "column",
-  justifyContent: "center",
-  width: "100%",
-  height: "100%",
-});
-
-const links: { name: string; desc: string; url: string }[] = [
-  {
-    name: "Wiki",
-    desc: "Find in-depth information about the Arweave protocol.",
-    url: "https://arwiki.wiki/",
-  },
-  {
-    name: "Cookbook",
-    desc: "Learn how to go from 0-1 with building Permaweb apps.",
-    url: "https://cookbook.arweave.dev/",
-  },
-  {
-    name: "Get a Wallet",
-    desc: "Get an Arweave wallet to start uploading data to the Permaweb.",
-    url: "https://www.arconnect.io/",
-  },
-  {
-    name: "VouchDao",
-    desc: "Vouch for your identity on the Permaweb!",
-    url: "https://vouchdao.xyz/",
-  },
-];
-
-const LinkCard = ({
-  name,
-  url,
-  desc,
-}: {
-  name: string;
-  url: string;
-  desc: string;
-}) => (
-  <Container
-    css={{
-      maxW: "24ch",
-      br: "$3",
-      boxShadow: "0 0 0 1px $colors$slate6",
-      p: "$5",
-
-      "&:hover": {
-        backgroundColor: "$slate2",
-        boxShadow: "0 0 0 1px $colors$slate7",
-      },
-    }}
-    as="a"
-    href={url}
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <Typography contrast="hiContrast" size="4" weight="6">
-      {name} <span>-&gt;</span>
-    </Typography>
-    <Typography>{desc}</Typography>
-  </Container>
-);
+import { AudioPlayer } from "@/modules/AudioPlayer/containers/AudioPlayer";
 
 export default function Home() {
   const [txid, setTxid] = useState<string>();
@@ -100,12 +31,10 @@ export default function Home() {
       </Head>
       <Center
         css={{
-          // backgroundColor: "$blackA1",
           height: "100%",
         }}
       >
-        {/* {txid ? <AudioRenderer txid={txid} /> : <Loader />} */}
-        <AudioPlayer txid={txid} />
+        {txid ? <AudioPlayer txid={txid} /> : <Loader />}
       </Center>
     </>
   );

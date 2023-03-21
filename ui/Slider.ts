@@ -16,7 +16,7 @@ export const SliderTrack = styled(Slider.Track, {
   position: "relative",
   flexGrow: 1,
   borderRadius: "9999px",
-  height: 3,
+  height: "$1",
 });
 
 export const SliderRange = styled(Slider.Range, {
