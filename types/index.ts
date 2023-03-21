@@ -2,7 +2,7 @@ export type Track = {
   name: string | undefined;
   creator: string;
   src: string;
-  artworkSrc: string | undefined;
+  artworkSrc: string;
 };
 
 export type Tracklist = Track[];
