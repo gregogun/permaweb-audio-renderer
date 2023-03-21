@@ -1,4 +1,4 @@
-import { Track } from "@/types";
+import { Track, Tracklist } from "@/types";
 import { abbreviateAddress, accountFromAddress, boringAvatars } from "@/utils";
 import arweaveGql from "arweave-graphql";
 
@@ -31,36 +31,68 @@ export const setTrackInfo = async (gateway: string, txid: string) => {
 
     // console.log("data", data);
 
-    const tags = data[0].tags;
+    // const tags = data[0].tags;
 
-    const id = data[0].id;
-    const trackName = tags.find((tag) => tag.name === "Title")?.value;
-    const artworkSrc = tags.find((tag) => tag.name === "Thumbnail")?.value;
+    // const id = data[0].id;
+    // const trackName = tags.find((tag) => tag.name === "Title")?.value;
+    // const artworkSrc = tags.find((tag) => tag.name === "Thumbnail")?.value;
 
-    /* check if user has profile data, otherwise fallback to address */
-    const owner = await accountFromAddress(data[0].owner.address).then(
-      (account) => {
-        if (account) {
-          return account.profile.handleName || account?.handle;
-        } else {
-          return abbreviateAddress({
-            address: data[0].owner.address,
-            options: { endChars: 5, noOfEllipsis: 3 },
-          });
-        }
-      }
+    // /* check if user has profile data, otherwise fallback to address */
+    // const owner = await accountFromAddress(data[0].owner.address).then(
+    //   (account) => {
+    //     if (account) {
+    //       return account.profile.handleName || account?.handle;
+    //     } else {
+    //       return abbreviateAddress({
+    //         address: data[0].owner.address,
+    //         options: { endChars: 5, noOfEllipsis: 3 },
+    //       });
+    //     }
+    //   }
+    // );
+
+    const tracklist = await Promise.all(
+      data.map(async (track) => {
+        const tags = track.tags;
+
+        const id = track.id;
+        const trackName = tags.find((tag) => tag.name === "Title")?.value;
+        const artworkSrc = tags.find((tag) => tag.name === "Thumbnail")?.value;
+
+        const owner = await accountFromAddress(track.owner.address).then(
+          (account) => {
+            if (account && account.profile.handleName) {
+              return account.profile.handleName;
+            } else {
+              return abbreviateAddress({
+                address: track.owner.address,
+                options: { endChars: 5, noOfEllipsis: 3 },
+              });
+            }
+          }
+        );
+
+        return {
+          name: trackName,
+          src: `${gateway}/${id}`,
+          creator: owner,
+          artworkSrc: artworkSrc
+            ? `${gateway}/${artworkSrc}`
+            : boringAvatars(id),
+        };
+      })
     );
 
-    const trackInfo: Track = {
-      name: trackName,
-      src: `${gateway}/${id}`,
-      creator: owner,
-      artworkSrc: artworkSrc ? `${gateway}/${artworkSrc}` : boringAvatars(id),
-    };
+    // const trackInfo: Track = {
+    //   name: trackName,
+    //   src: `${gateway}/${id}`,
+    //   creator: owner,
+    //   artworkSrc: artworkSrc ? `${gateway}/${artworkSrc}` : boringAvatars(id),
+    // };
 
-    // console.log(trackInfo);
+    console.log(tracklist);
 
-    return trackInfo;
+    return tracklist;
   } catch (error) {
     console.error(error);
     throw new Error(error as unknown as string);

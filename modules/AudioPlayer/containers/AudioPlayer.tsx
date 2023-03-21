@@ -17,7 +17,7 @@ export const AudioPlayer = ({
   const [track, setTrack] = useState<Track>();
 
   /* will update to tracklist once manifests supported */
-  // const [tracklist, setTracklist] = useState<Track[]>()
+  const [tracklist, setTracklist] = useState<Track[]>();
 
   /* FETCH TX & TRANSFORM DATA */
 
@@ -30,7 +30,7 @@ export const AudioPlayer = ({
 
     try {
       const data = await setTrackInfo(gateway, txid);
-      setTrack(data);
+      setTracklist(data);
     } catch (error) {
       console.error(error);
       setError(
@@ -43,16 +43,9 @@ export const AudioPlayer = ({
     return <Typography>{error}</Typography>;
   }
 
-  if (!txid || !track) {
+  if (!txid || !tracklist) {
     return null;
   }
 
-  return (
-    <Component
-      src={track.src}
-      name={track.name}
-      creator={track.creator}
-      artworkSrc={track.artworkSrc}
-    />
-  );
+  return <Component tracklist={tracklist} />;
 };

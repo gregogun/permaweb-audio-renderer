@@ -1,4 +1,4 @@
-import { Track } from "@/types";
+import { Track, Tracklist } from "@/types";
 import { SliderRange, SliderRoot, SliderThumb, SliderTrack } from "@/ui/Slider";
 import { formatTime } from "@/utils";
 import { Flex, IconButton, styled, Typography } from "@aura-ui/react";
@@ -46,8 +46,9 @@ const CoverArtwork = styled("img", {
   objectPosition: "center",
 });
 
-export const AudioPlayer = ({ src, name, creator, artworkSrc }: Track) => {
+export const AudioPlayer = ({ tracklist }: { tracklist: Tracklist }) => {
   const [progressStep, setProgressStep] = useState<number>(0.01);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const {
     audioRef,
     gainRef,
@@ -62,6 +63,13 @@ export const AudioPlayer = ({ src, name, creator, artworkSrc }: Track) => {
     setScrubbedValue,
     handlePlayPause,
   } = useAudioPlayer();
+
+  /* VARS */
+
+  const src = tracklist[currentTrackIndex].src;
+  const name = tracklist[currentTrackIndex].name;
+  const creator = tracklist[currentTrackIndex].creator;
+  const artworkSrc = tracklist[currentTrackIndex].artworkSrc;
 
   /* EVENT HANDLERS */
 
