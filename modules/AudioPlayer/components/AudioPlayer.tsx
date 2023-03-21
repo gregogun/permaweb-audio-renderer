@@ -1,6 +1,7 @@
+import { Track } from "@/types";
 import { SliderRange, SliderRoot, SliderThumb, SliderTrack } from "@/ui/Slider";
 import { formatTime } from "@/utils";
-import { Flex, Grid, IconButton, styled, Typography } from "@aura-ui/react";
+import { Flex, IconButton, styled, Typography } from "@aura-ui/react";
 import { KeyboardEvent, useState } from "react";
 import { MdPause, MdPlayArrow } from "react-icons/md";
 import { MdVolumeDown, MdVolumeUp } from "react-icons/md";
@@ -8,20 +9,6 @@ import { useAudioPlayer } from "../hooks/useAudioPlayer";
 
 const PlayPauseButton = styled(IconButton, {
   br: 9999,
-  backgroundColor: "$whiteA12",
-  color: "$blackA12",
-
-  "& svg": {
-    size: "$6",
-  },
-
-  "&:hover": {
-    backgroundColor: "hsla(0, 0%, 100%, 0.857)",
-  },
-
-  "&:active": {
-    backgroundColor: "hsla(0, 0%, 100%, 0.648)",
-  },
 });
 
 const Slider = styled(SliderRoot, {
@@ -59,15 +46,7 @@ const CoverArtwork = styled("img", {
   objectPosition: "center",
 });
 
-interface AudioPlayerProps {
-  txid: string | undefined;
-  gateway?: string;
-}
-
-export const AudioPlayer = ({
-  txid,
-  gateway = "https://arweave.net",
-}: AudioPlayerProps) => {
+export const AudioPlayer = ({ src, name, creator, artworkSrc }: Track) => {
   const [progressStep, setProgressStep] = useState<number>(0.01);
   const {
     audioRef,
@@ -83,6 +62,8 @@ export const AudioPlayer = ({
     setScrubbedValue,
     handlePlayPause,
   } = useAudioPlayer();
+
+  /* EVENT HANDLERS */
 
   const handleValueChange = (e: number[]) => {
     if (!gainRef.current) return;
@@ -118,27 +99,28 @@ export const AudioPlayer = ({
 
         backgroundColor: "$slate2",
         p: "$5",
-        br: "$3",
+        br: "$5",
         width: "$$width",
         overflow: "hidden",
       }}
       direction="column"
-      gap="3"
+      gap="5"
     >
       <audio ref={audioRef}>
-        <source src="./Transcend.ogg" type="audio/ogg" />
-        <source src="./Transcend.wav" type="audio/wav" />
-        <source src="./Transcend.mp3" type="audio/mpeg" />
+        <source src={src} type="audio/ogg" />
+        <source src={src} type="audio/wav" />
+        <source src={src} type="audio/mpeg" />
+        <source src={src} type="audio/aac" />
         <Typography>Audio file type not supported.</Typography>
       </audio>
 
-      <CoverArtwork src="giphy.webp" />
+      <CoverArtwork src={artworkSrc} />
 
-      <Flex direction="column">
+      <Flex css={{ mt: "-$2" }} direction="column">
         <Typography weight="6" contrast="hiContrast">
-          Transcend
+          {name ? name : "(Untitled)"}
         </Typography>
-        <Typography size="2">gregoriousbeats</Typography>
+        <Typography size="2">{creator}</Typography>
       </Flex>
 
       <Flex
@@ -192,9 +174,26 @@ export const AudioPlayer = ({
         }}
       >
         <PlayPauseButton
+          css={{
+            color: "$blackA12",
+            backgroundColor: "$whiteA12",
+
+            "& svg": {
+              size: "$6",
+            },
+
+            "&:hover": {
+              backgroundColor: "hsla(0, 0%, 100%, 0.857)",
+            },
+
+            "&:active": {
+              backgroundColor: "hsla(0, 0%, 100%, 0.648)",
+            },
+          }}
           size="3"
           data-playing={playing}
           aria-checked={playing}
+          disabled={!src}
           role="switch"
           onClick={handlePlayPause}
         >
@@ -204,20 +203,19 @@ export const AudioPlayer = ({
 
       <Flex
         css={{
-          width: "300px",
-
           "& svg": {
             size: "$5",
           },
         }}
         align="center"
         justify="center"
-        gap="2"
+        gap="3"
       >
         <MdVolumeDown />
         <VolumeContainer
           css={{
-            minWidth: 200,
+            width: "100%",
+            flex: 1,
           }}
         >
           <VolumeSlider

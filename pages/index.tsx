@@ -1,13 +1,9 @@
 import Head from "next/head";
-import styles from "@/styles/Home.module.css";
-import { Center, Container, Flex, styled, Typography } from "@aura-ui/react";
-import { ConnectWallet } from "arweave-wallet-ui-test";
-import { account } from "@/lib/arweave";
+import { Center, Container, styled, Typography } from "@aura-ui/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { AudioRenderer } from "@/modules/AudioRenderer";
 import { Loader } from "@/ui/Loader";
-import { AudioPlayer } from "@/modules/AudioPlayer/components/AudioPlayer";
+import { AudioPlayer } from "@/modules/AudioPlayer/containers/AudioPlayer";
 
 const Main = styled("main", {
   display: "flex",
@@ -79,7 +75,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // console.log(router.query.tx);
+    console.log(router.query.tx);
 
     if (router.query.tx) {
       setTxid(router.query.tx as string);
@@ -104,8 +100,8 @@ export default function Home() {
           height: "100%",
         }}
       >
-        {/* {txid ? <AudioRenderer txid={txid} /> : <Loader />} */}
-        <AudioPlayer txid={txid} />
+        {txid ? <AudioPlayer txid={txid} /> : <Loader />}
+        {/* <AudioPlayer txid={txid} /> */}
       </Center>
     </>
   );
