@@ -29,7 +29,7 @@ export const setTrackInfo = async (gateway: string, txid: string) => {
   try {
     const data = await getTxData(gateway, txid);
 
-    console.log("data", data);
+    // console.log("data", data);
 
     const tags = data[0].tags;
 
@@ -58,7 +58,7 @@ export const setTrackInfo = async (gateway: string, txid: string) => {
       artworkSrc: artworkSrc ? `${gateway}/${artworkSrc}` : boringAvatars(id),
     };
 
-    console.log(trackInfo);
+    // console.log(trackInfo);
 
     return trackInfo;
   } catch (error) {
