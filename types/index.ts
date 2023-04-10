@@ -6,3 +6,18 @@ export type Track = {
 };
 
 export type Tracklist = Track[];
+
+type ManifestPath = {
+  id: string;
+};
+
+export type Manifest = {
+  index?: {
+    path: string;
+  };
+  paths: {
+    [key: string]: ManifestPath;
+  };
+};
+
+export type ValidTrack = {};

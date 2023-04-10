@@ -1,13 +1,22 @@
-import { Track, Tracklist } from "@/types";
+import { Tracklist } from "@/types";
 import { SliderRange, SliderRoot, SliderThumb, SliderTrack } from "@/ui/Slider";
-import { formatTime } from "@/utils";
+import { abbreviateAddress, formatTime } from "@/utils";
 import { Flex, IconButton, styled, Typography } from "@aura-ui/react";
-import { KeyboardEvent, useState } from "react";
-import { MdPause, MdPlayArrow } from "react-icons/md";
+import { KeyboardEvent, useEffect, useState } from "react";
+import {
+  MdPause,
+  MdPlayArrow,
+  MdSkipNext,
+  MdSkipPrevious,
+} from "react-icons/md";
 import { MdVolumeDown, MdVolumeUp } from "react-icons/md";
 import { useAudioPlayer } from "../hooks/useAudioPlayer";
 
 const PlayPauseButton = styled(IconButton, {
+  br: 9999,
+});
+
+const SkipButton = styled(IconButton, {
   br: 9999,
 });
 
@@ -48,28 +57,33 @@ const CoverArtwork = styled("img", {
 
 export const AudioPlayer = ({ tracklist }: { tracklist: Tracklist }) => {
   const [progressStep, setProgressStep] = useState<number>(0.01);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  // const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const {
     audioRef,
     gainRef,
     audioCtxRef,
+    ready,
     playing,
     duration,
     currentTime,
-    setCurrentTime,
     scrubbing,
     setScrubbing,
     scrubbedValue,
     setScrubbedValue,
+    setCurrentTime,
     handlePlayPause,
-  } = useAudioPlayer();
+    currentTrackIndex,
+    handleNextTrack,
+    handlePrevTrack,
+  } = useAudioPlayer(tracklist);
+
+  useEffect(() => {
+    console.log("tracklist", tracklist);
+  }, []);
 
   /* VARS */
 
-  const src = tracklist[currentTrackIndex].src;
-  const name = tracklist[currentTrackIndex].name;
-  const creator = tracklist[currentTrackIndex].creator;
-  const artworkSrc = tracklist[currentTrackIndex].artworkSrc;
+  const currentTrack = tracklist[currentTrackIndex];
 
   /* EVENT HANDLERS */
 
@@ -115,20 +129,25 @@ export const AudioPlayer = ({ tracklist }: { tracklist: Tracklist }) => {
       gap="5"
     >
       <audio ref={audioRef}>
-        <source src={src} type="audio/ogg" />
-        <source src={src} type="audio/wav" />
-        <source src={src} type="audio/mpeg" />
-        <source src={src} type="audio/aac" />
+        <source src={currentTrack.src} type="audio/ogg" />
+        <source src={currentTrack.src} type="audio/wav" />
+        <source src={currentTrack.src} type="audio/mpeg" />
+        <source src={currentTrack.src} type="audio/aac" />
         <Typography>Audio file type not supported.</Typography>
       </audio>
 
-      <CoverArtwork src={artworkSrc} />
+      <CoverArtwork src={currentTrack.artworkSrc} />
 
       <Flex css={{ mt: "-$2" }} direction="column">
         <Typography weight="6" contrast="hiContrast">
-          {name ? name : "(Untitled)"}
+          {currentTrack.name ? currentTrack.name : "(Untitled)"}
         </Typography>
-        <Typography size="2">{creator}</Typography>
+        <Typography size="2">
+          {abbreviateAddress({
+            address: currentTrack.creator,
+            options: { endChars: 5, noOfEllipsis: 3 },
+          })}
+        </Typography>
       </Flex>
 
       <Flex
@@ -180,7 +199,21 @@ export const AudioPlayer = ({ tracklist }: { tracklist: Tracklist }) => {
           mx: "auto",
           my: "$3",
         }}
+        align="center"
+        gap="3"
       >
+        <SkipButton
+          onClick={handlePrevTrack}
+          css={{
+            svg: {
+              size: "$6",
+            },
+          }}
+          variant="ghost"
+          disabled={tracklist.length < 2}
+        >
+          <MdSkipPrevious />
+        </SkipButton>
         <PlayPauseButton
           css={{
             color: "$blackA12",
@@ -201,12 +234,24 @@ export const AudioPlayer = ({ tracklist }: { tracklist: Tracklist }) => {
           size="3"
           data-playing={playing}
           aria-checked={playing}
-          disabled={!src}
+          // disabled={!ready}
           role="switch"
           onClick={handlePlayPause}
         >
           {playing ? <MdPause /> : <MdPlayArrow />}
         </PlayPauseButton>
+        <SkipButton
+          onClick={handleNextTrack}
+          css={{
+            svg: {
+              size: "$6",
+            },
+          }}
+          variant="ghost"
+          disabled={tracklist.length < 2}
+        >
+          <MdSkipNext />
+        </SkipButton>
       </ControlsContainer>
 
       <Flex

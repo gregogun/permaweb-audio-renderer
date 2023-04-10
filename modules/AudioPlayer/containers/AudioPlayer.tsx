@@ -14,9 +14,6 @@ export const AudioPlayer = ({
   gateway = "https://arweave.net",
 }: AudioPlayerProps) => {
   const [error, setError] = useState<string>();
-  const [track, setTrack] = useState<Track>();
-
-  /* will update to tracklist once manifests supported */
   const [tracklist, setTracklist] = useState<Track[]>();
 
   /* FETCH TX & TRANSFORM DATA */
@@ -30,6 +27,8 @@ export const AudioPlayer = ({
 
     try {
       const data = await setTrackInfo(gateway, txid);
+      console.log("fetched data", data);
+
       setTracklist(data);
     } catch (error) {
       console.error(error);
