@@ -1,6 +1,7 @@
+import { Tracklist } from "@/types";
 import { useEffect, useRef, useState } from "react";
 
-export const useAudioPlayer = () => {
+export const useAudioPlayer = (tracklist: Tracklist) => {
   const audioRef = useRef<HTMLMediaElement | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const [duration, setDuration] = useState<number>();
@@ -12,6 +13,32 @@ export const useAudioPlayer = () => {
     undefined
   );
   const [scrubbing, setScrubbing] = useState<boolean>();
+  const [ready, setReady] = useState(false);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+
+  /* ACTION HANDLERS */
+
+  const handlePrevTrack = () => {
+    setCurrentTrackIndex(
+      currentTrackIndex === 0 ? tracklist.length - 1 : currentTrackIndex - 1
+    );
+    setCurrentTime(0);
+    audioRef.current?.load();
+    audioRef.current?.play();
+    setPlaying(true);
+  };
+
+  const handleNextTrack = () => {
+    setCurrentTrackIndex(
+      currentTrackIndex === tracklist.length - 1 ? 0 : currentTrackIndex + 1
+    );
+    setCurrentTime(0);
+    audioRef.current?.load();
+    audioRef.current?.play();
+    setPlaying(true);
+  };
+
+  /* SIDE EFFECTS */
 
   useEffect(() => {
     // set audio context
@@ -62,10 +89,14 @@ export const useAudioPlayer = () => {
 
   // set duration
   useEffect(() => {
+    if (!audioRef.current) return;
+
     const seconds = Math.floor(audioRef.current?.duration || 0);
     setDuration(seconds);
     const current = Math.floor(audioRef.current?.currentTime || 0);
     setCurrentTime(current);
+
+    setReady(audioRef.current.readyState > 2);
   }, [audioRef.current?.onloadeddata, audioRef.current?.readyState]);
 
   // listeners
@@ -99,12 +130,16 @@ export const useAudioPlayer = () => {
     audioCtxRef,
     duration,
     currentTime,
+    ready,
     playing,
     scrubbing,
     scrubbedValue,
     handlePlayPause,
     setScrubbing,
-    setCurrentTime,
     setScrubbedValue,
+    setCurrentTime,
+    currentTrackIndex,
+    handlePrevTrack,
+    handleNextTrack,
   };
 };
